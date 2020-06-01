@@ -1,0 +1,2 @@
+include versioneer.py
+include mof_vac_level/_version.py
