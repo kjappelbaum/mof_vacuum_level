@@ -24,6 +24,10 @@ import numba as nb
 import numpy
 import numpy as np
 from scipy import interpolate
+import warnings
+from numba import NumbaPendingDeprecationWarning
+
+warnings.simplefilter("ignore", category=NumbaPendingDeprecationWarning)
 
 # ------------------------------------------------------------------------------
 def gradient_magnitude(gx, gy, gz):
@@ -167,6 +171,7 @@ def macroscopic_average(potential, periodicity, resolution):
 
 
 # ------------------------------------------------------------------------------
+
 
 
 @jit(nopython=True,)

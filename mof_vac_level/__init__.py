@@ -59,7 +59,7 @@ def _nested_search(
     var = np.zeros([len(dimension_1), len(dimension_2), len(dimension_3)])
     potential = np.zeros([len(dimension_1), len(dimension_2), len(dimension_3)])
 
-    for ii, i in tqdm(enumerate(dimension_1)):
+    for ii, i in enumerate(tqdm(dimension_1)):
         for jj, j in enumerate(dimension_2):
             result = pool.map(partial_point_test, [(i, j, k) for k in dimension_3])
 
@@ -70,6 +70,9 @@ def _nested_search(
                 potential[ii][jj][k] = resultpoint[0]
 
     minimum_variance = np.argmin(var)
+    print(minimum_variance)
+
+    minimum_variance = np.unravel_index(minimum_variance, var.shape)
     return var[minimum_variance], potential[minimum_variance], minimum_variance
 
 
