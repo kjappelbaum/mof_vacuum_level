@@ -91,9 +91,9 @@ def _test_one_point(
 class MOFVacLevel:
     """Vacuum level from the cube file of a porous MOF"""
 
-    def __init__(self, input_cube: str, cube_size: list = [35, 35, 35]):
+    def __init__(self, input_cube: str):
         self.input_cube = input_cube
-        self.cube_size = cube_size
+
         (
             self.pot,
             self.ngx,
@@ -121,7 +121,9 @@ class MOFVacLevel:
         self.cube_potential = None
         self.cube_variance = None
 
-    def _find_lowest_var_point(self, threshold: float = 2.0, res: float = 0.2):
+    def _find_lowest_var_point(
+        self, threshold: float = 4.0, res: float = 0.2, cube_size: list = [30, 30, 30]
+    ):
         lowest_variance, potential, minimum_variance_coords = _nested_search(
             res,
             self.vector_a,
@@ -131,7 +133,7 @@ class MOFVacLevel:
             self.params,
             self.num_atoms,
             threshold,
-            self.cube_size,
+            cube_size,
             self.grid_pot,
             self.ngx,
             self.ngy,
@@ -142,8 +144,10 @@ class MOFVacLevel:
         self.cube_potential = potential
         self.minimum_variance_coords = minimum_variance_coords
 
-    def get_vacuum_potential(self, threshold: float = 2.0, res: float = 0.2):
-        self._find_lowest_var_point(threshold, res)
+    def get_vacuum_potential(
+        self, threshold: float = 2.0, res: float = 0.2, cube_size: list = [30, 30, 30]
+    ):
+        self._find_lowest_var_point(threshold, res, cube_size)
         return self.cube_potential
 
     @property
