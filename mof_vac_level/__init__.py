@@ -2,17 +2,17 @@
 """Calculate the vacuum level using the lowest variance estimate from a cube file of a porous MOF"""
 from __future__ import absolute_import
 
-import math
-
-from . import macrodensity as md
-import numpy as np
-from .macrodensity.cp2k_tools import cell_to_cellpar, read_cube_density, test_point
-import multiprocess as mp
 import itertools
+import math
 from functools import partial
+
+import multiprocess as mp
+import numpy as np
 from tqdm import tqdm
 
+from . import macrodensity as md
 from ._version import get_versions
+from .macrodensity.cp2k_tools import cell_to_cellpar, read_cube_density, test_point
 
 __version__ = get_versions()["version"]
 del get_versions
@@ -145,7 +145,7 @@ class MOFVacLevel:
         self.minimum_variance_coords = minimum_variance_coords
 
     def get_vacuum_potential(
-        self, threshold: float = 2.0, res: float = 0.2, cube_size: list = [30, 30, 30]
+        self, threshold: float = 4.0, res: float = 0.2, cube_size: list = [30, 30, 30]
     ):
         self._find_lowest_var_point(threshold, res, cube_size)
         return self.cube_potential
