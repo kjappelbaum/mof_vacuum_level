@@ -4,14 +4,88 @@ from __future__ import absolute_import
 
 import math
 
-import macrodensity as md
+from . import macrodensity as md
 import numpy as np
-from macrodensity.cp2k_tools import cell_to_cellpar, read_cube_density, test_point
+from .macrodensity.cp2k_tools import cell_to_cellpar, read_cube_density, test_point
+import multiprocess as mp
+import itertools
+from functools import partial
+from tqdm import tqdm
 
 from ._version import get_versions
 
 __version__ = get_versions()["version"]
 del get_versions
+
+
+def _nested_search(
+    res,
+    vector_a,
+    vector_b,
+    vector_c,
+    coord,
+    params,
+    num_atoms,
+    threshold,
+    cube_size,
+    grid_pot,
+    ngx,
+    ngy,
+    ngz,
+):
+    pool = mp.Pool()
+
+    c1 = res / vector_a
+    c2 = res / vector_b
+    c3 = res / vector_c
+
+    partial_point_test = partial(
+        _test_one_point,
+        coord=coord,
+        params=params,
+        num_atoms=num_atoms,
+        threshold=threshold,
+        cube_size=cube_size,
+        grid_pot=grid_pot,
+        ngx=ngx,
+        ngy=ngy,
+        ngz=ngz,
+    )
+
+    dimension_1 = np.arange(0.0, 1.0, c1)
+    dimension_2 = np.arange(0.0, 1.0, c2)
+    dimension_3 = np.arange(0.0, 1.0, c3)
+
+    var = np.zeros([len(dimension_1), len(dimension_2), len(dimension_3)])
+    potential = np.zeros([len(dimension_1), len(dimension_2), len(dimension_3)])
+
+    for ii, i in tqdm(enumerate(dimension_1)):
+        for jj, j in enumerate(dimension_2):
+            result = pool.map(partial_point_test, [(i, j, k) for k in dimension_3])
+
+            potentials, variances = [], []
+            for k, resultpoint in enumerate(result):
+
+                var[ii][jj][k] = resultpoint[1]
+                potential[ii][jj][k] = resultpoint[0]
+
+    minimum_variance = np.argmin(var)
+    return var[minimum_variance], potential[minimum_variance], minimum_variance
+
+
+def _test_one_point(
+    cube_origin, coord, params, num_atoms, threshold, cube_size, grid_pot, ngx, ngy, ngz
+):
+    travelled = [0, 0, 0]
+    logical = test_point(cube_origin, coord, params, num_atoms, threshold)
+    if logical == 1:
+
+        cube_potential, cube_var = md.cube_potential(
+            cube_origin, travelled, cube_size, grid_pot, ngx, ngy, ngz,
+        )
+        return cube_potential, cube_var
+
+    return np.nan, np.nan
 
 
 class MOFVacLevel:
@@ -43,59 +117,43 @@ class MOFVacLevel:
         self.grid_pot = md.density_grid_cube(self.pot, self.ngx, self.ngy, self.ngz)
         self.params = cell_to_cellpar(self.lattice, radians=False)
 
-        self.d_l = None
-        self.f_l = None
-        self.g_l = None
+        self.minimum_variance_coords = None
         self.cube_potential = None
         self.cube_variance = None
 
-    def _find_lowest_var_point(self, threshold: float = 2.0):
-        travelled = [0, 0, 0]
-        cube_var_l = 1000
-        cube_potential_l = 0
-        d_l = 0
-        f_l = 0
-        g_l = 0
-        logical = 0
+    def _find_lowest_var_point(self, threshold: float = 2.0, res: float = 0.2):
+        lowest_variance, potential, minimum_variance_coords = _nested_search(
+            res,
+            self.vector_a,
+            self.vector_b,
+            self.vector_c,
+            self.coord,
+            self.params,
+            self.num_atoms,
+            threshold,
+            self.cube_size,
+            self.grid_pot,
+            self.ngx,
+            self.ngy,
+            self.ngz,
+        )
 
-        c1 = 0.2 / self.vector_a
-        c2 = 0.2 / self.vector_b
-        c3 = 0.2 / self.vector_c
+        self.lowest_variance = lowest_variance
+        self.cube_potential = potential
+        self.minimum_variance_coords = minimum_variance_coords
 
-        for d in np.arange(0.0, 1.0, c1):
-            for f in np.arange(0.0, 1.0, c2):
-                for g in np.arange(0.0, 1.0, c3):
-                    cube_origin = [d, f, g]
-                    logical = test_point(
-                        cube_origin, self.coord, self.params, self.num_atoms, threshold
-                    )
-                    if logical == 1:
-                        cube_potential, cube_var = md.cube_potential(
-                            cube_origin,
-                            travelled,
-                            self.cube_size,
-                            self.grid_pot,
-                            self.ngx,
-                            self.ngy,
-                            self.ngz,
-                        )
-                        if cube_var < cube_var_l:
-                            cube_var_l = cube_var
-                            cube_potential_l = cube_potential
-                            d_l = d
-                            f_l = f
-                            g_l = g
-
-        self.d_l = d_l
-        self.f_l = f_l
-        self.g_l = g_l
-        self.cube_potential = cube_potential_l
-        self.cube_variance = cube_var_l
-
-    def get_vacuum_potential(self):
-        self._find_lowest_var_point()
+    def get_vacuum_potential(self, threshold: float = 2.0, res: float = 0.2):
+        self._find_lowest_var_point(threshold, res)
         return self.cube_potential
 
     @property
     def vacuum_potential(self):
         return self.cube_potential
+
+    @property
+    def minimum_variance(self):
+        return self.minimum_variance
+
+    @property
+    def minimum_variance_indices(self):
+        return self.minimum_variance_coords

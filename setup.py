@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 import versioneer
 
@@ -9,16 +9,10 @@ setup(
     name="mof_vac_level",
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
-    packages=["mof_vac_level"],
+    packages=find_packages(),
     url="",
     license="MIT",
-    install_requires=[
-        "numpy",
-        "macrodensity @ git+https://github.com/WMD-group/MacroDensity.git@v2.0.0#egg=macrodensity",
-    ],
-    dependency_links=[
-        "git+https://github.com/WMD-group/MacroDensity.git@v2.0.0#egg=macrodensity"
-    ],
+    install_requires=["numpy", "scipy", "matplotlib", "tqdm", "multiprocess", "numba"],
     extras_require={
         "testing": ["pytest", "pytest-cov<2.6"],
         "docs": ["sphinx-rtd-theme", "sphinxcontrib-bibtex"],
