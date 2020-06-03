@@ -9,7 +9,7 @@ This is an installable version of the code proposed by Fumanal et al. [1], build
 - some parts of the code are vectorized, just-in-time compiled or multiprocessed
 - progress bar
 
-## Installation 
+## Installation
 
 ```
 pip install git+git@github.com:kjappelbaum/mof_vacuum_level.git
