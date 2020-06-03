@@ -33,46 +33,49 @@ def _nested_search(
     ngy,
     ngz,
 ):
-    pool = mp.Pool()
+    try:
+        pool = mp.Pool()
 
-    c1 = res / vector_a
-    c2 = res / vector_b
-    c3 = res / vector_c
+        c1 = res / vector_a
+        c2 = res / vector_b
+        c3 = res / vector_c
 
-    partial_point_test = partial(
-        _test_one_point,
-        coord=coord,
-        params=params,
-        num_atoms=num_atoms,
-        threshold=threshold,
-        cube_size=cube_size,
-        grid_pot=grid_pot,
-        ngx=ngx,
-        ngy=ngy,
-        ngz=ngz,
-    )
+        partial_point_test = partial(
+            _test_one_point,
+            coord=coord,
+            params=params,
+            num_atoms=num_atoms,
+            threshold=threshold,
+            cube_size=cube_size,
+            grid_pot=grid_pot,
+            ngx=ngx,
+            ngy=ngy,
+            ngz=ngz,
+        )
 
-    dimension_1 = np.arange(0.0, 1.0, c1)
-    dimension_2 = np.arange(0.0, 1.0, c2)
-    dimension_3 = np.arange(0.0, 1.0, c3)
+        dimension_1 = np.arange(0.0, 1.0, c1)
+        dimension_2 = np.arange(0.0, 1.0, c2)
+        dimension_3 = np.arange(0.0, 1.0, c3)
 
-    var = np.zeros([len(dimension_1), len(dimension_2), len(dimension_3)])
-    potential = np.zeros([len(dimension_1), len(dimension_2), len(dimension_3)])
+        var = np.zeros([len(dimension_1), len(dimension_2), len(dimension_3)])
+        potential = np.zeros([len(dimension_1), len(dimension_2), len(dimension_3)])
 
-    for ii, i in enumerate(tqdm(dimension_1)):
-        for jj, j in enumerate(dimension_2):
-            result = pool.map(partial_point_test, [(i, j, k) for k in dimension_3])
+        for ii, i in enumerate(tqdm(dimension_1)):
+            for jj, j in enumerate(dimension_2):
+                result = pool.map(partial_point_test, [(i, j, k) for k in dimension_3])
 
-            potentials, variances = [], []
-            for k, resultpoint in enumerate(result):
+                potentials, variances = [], []
+                for k, resultpoint in enumerate(result):
 
-                var[ii][jj][k] = resultpoint[1]
-                potential[ii][jj][k] = resultpoint[0]
+                    var[ii][jj][k] = resultpoint[1]
+                    potential[ii][jj][k] = resultpoint[0]
 
-    minimum_variance = np.argmin(var)
+        minimum_variance = np.argmin(var)
 
-    minimum_variance = np.unravel_index(minimum_variance, var.shape)
-    return potential[minimum_variance], var[minimum_variance], minimum_variance
+        minimum_variance = np.unravel_index(minimum_variance, var.shape)
+        return potential[minimum_variance], var[minimum_variance], minimum_variance
+    except Exception:
+        return None, None, None
 
 
 def _test_one_point(
