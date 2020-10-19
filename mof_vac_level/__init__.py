@@ -6,15 +6,16 @@ import itertools
 import math
 from functools import partial
 
-import multiprocess as mp
 import numpy as np
 from tqdm import tqdm
 
+import multiprocess as mp
+
 from . import macrodensity as md
 from ._version import get_versions
-from .macrodensity.cp2k_tools import cell_to_cellpar, read_cube_density, test_point
+from .macrodensity.cp2k_tools import (cell_to_cellpar, read_cube_density, test_point)
 
-__version__ = get_versions()["version"]
+__version__ = get_versions()['version']
 del get_versions
 
 
@@ -64,7 +65,6 @@ def _nested_search(
             for jj, j in enumerate(dimension_2):
                 result = pool.map(partial_point_test, [(i, j, k) for k in dimension_3])
 
-                potentials, variances = [], []
                 for k, resultpoint in enumerate(result):
 
                     var[ii][jj][k] = resultpoint[1]
@@ -78,15 +78,19 @@ def _nested_search(
         return None, None, None
 
 
-def _test_one_point(
-    cube_origin, coord, params, num_atoms, threshold, cube_size, grid_pot, ngx, ngy, ngz
-):
+def _test_one_point(cube_origin, coord, params, num_atoms, threshold, cube_size, grid_pot, ngx, ngy, ngz):
     travelled = [0, 0, 0]
     logical = test_point(cube_origin, coord, params, num_atoms, threshold)
     if logical == 1:
 
         cube_potential, cube_var = md.cube_potential(
-            cube_origin, travelled, cube_size, grid_pot, ngx, ngy, ngz,
+            cube_origin,
+            travelled,
+            cube_size,
+            grid_pot,
+            ngx,
+            ngy,
+            ngz,
         )
         return cube_potential, cube_var
 
@@ -126,9 +130,7 @@ class MOFVacLevel:
         self.cube_potential = None
         self.cube_variance = None
 
-    def _find_lowest_var_point(
-        self, threshold: float = 4.0, res: float = 0.2, cube_size: list = [30, 30, 30]
-    ):
+    def _find_lowest_var_point(self, threshold: float = 4.0, res: float = 0.2, cube_size: list = [30, 30, 30]):
         potential, lowest_variance, minimum_variance_coords = _nested_search(
             res,
             self.vector_a,
@@ -149,9 +151,7 @@ class MOFVacLevel:
         self.cube_potential = potential
         self.minimum_variance_coords = minimum_variance_coords
 
-    def get_vacuum_potential(
-        self, threshold: float = 4.0, res: float = 0.2, cube_size: list = [30, 30, 30]
-    ):
+    def get_vacuum_potential(self, threshold: float = 4.0, res: float = 0.2, cube_size: list = [30, 30, 30]):
         self._find_lowest_var_point(threshold, res, cube_size)
         return self.cube_potential
 

@@ -31,7 +31,6 @@ from six.moves import range
 warnings.simplefilter('ignore', category=NumbaPendingDeprecationWarning)
 
 
-# ------------------------------------------------------------------------------
 def gradient_magnitude(gx, gy, gz):
     """Converts the separate gradient magnitudes to a single magnitude
     Args:
@@ -46,9 +45,6 @@ def gradient_magnitude(gx, gy, gz):
                 grad_mag[i, j, k] = np.sqrt(gx[i, j, k]**2 + gy[i, j, k]**2 + gz[i, j, k]**2)
 
     return grad_mag
-
-
-# ------------------------------------------------------------------------------
 
 
 def vector_2_abscissa(vector, magnitude, dx, dy, dz):
@@ -68,9 +64,6 @@ def vector_2_abscissa(vector, magnitude, dx, dy, dz):
     return np.asarray(abscissa)
 
 
-# ------------------------------------------------------------------------------
-
-
 def number_in_field(gradients, cutoff):
     """Get number of grid elements with a field magnitude greater than cutoff
     Args:
@@ -87,9 +80,6 @@ def number_in_field(gradients, cutoff):
     return number_of_elements
 
 
-# ------------------------------------------------------------------------------
-
-
 def element_vol(vol, nx, ny, nz):
     """Calculates the volume of each of the elements on the grid.
     Args:
@@ -104,29 +94,23 @@ def element_vol(vol, nx, ny, nz):
     return ele_vol
 
 
-# ------------------------------------------------------------------------------
-
-
-def one_2_2d(Array, resolution, vector):
+def one_2_2d(array, resolution, vector):
     """Converts the 1d potential array to 2D with angstroms in A[0]
     Args:
-        Array: 1D array
+        array: 1D array
         resolution: density of sampling of distance (1/AA)
         vector: The vector of the direction of sampling
     Returns
         New_array: 2D array
     """
     length = np.sqrt(vector.dot(vector))
-    New_array = np.zeros(shape=(len(Array) - 1, 2))
-    resolution = length / len(Array)
-    for i in range(len(Array) - 1):
-        New_array[i, 0] = i * resolution
-        New_array[i, 1] = Array[i]
+    new_array = np.zeros(shape=(len(array) - 1, 2))
+    resolution = length / len(array)
+    for i in range(len(array) - 1):
+        new_array[i, 0] = i * resolution
+        new_array[i, 1] = array[i]
 
-    return New_array
-
-
-# ------------------------------------------------------------------------------
+    return new_array
 
 
 def macroscopic_average(potential, periodicity, resolution):
@@ -159,12 +143,9 @@ def macroscopic_average(potential, periodicity, resolution):
         else:
             macro_average[i] = (macro_average[i] + sum(potential[start:end]) / period_points)
 
-    print('Average of the average = ', numpy.average(macro_average))
+    print('Average of the average = ', np.mean(macro_average))
 
     return macro_average
-
-
-# ------------------------------------------------------------------------------
 
 
 @jit(
@@ -199,9 +180,6 @@ def cube_potential(origin, travelled, cube, Grid, nx, ny, nz):
     return mean, var
 
 
-# ------------------------------------------------------------------------------
-
-
 def cuboid_average(Grid, cube, origin, vector, nx, ny, nz, magnitude):
     """Calculates the average in a cube defined by size cube(a,b,c), beginning
     at origin and travelling as far as magnitude."""
@@ -210,41 +188,35 @@ def cuboid_average(Grid, cube, origin, vector, nx, ny, nz, magnitude):
     i = 0
     while i < magnitude:
         travelled = np.multiply(i, vector)
-        plotting_average[i], varience = cube_potential(origin, travelled, cube, Grid, nx, ny, nz)
+        plotting_average[i], _ = cube_potential(origin, travelled, cube, Grid, nx, ny, nz)
         i = i + 1
 
     return plotting_average
 
 
-# ------------------------------------------------------------------------------
-
-
-def planar_average(Grid, nx, ny, nz, axis='z'):
+def planar_average(grid, nx, ny, nz, axis='z'):
     """Calculate the average in a given plane for the full length of the
     normal; e.g. the full length of z in the xy plane."""
     if axis == 'x':
         x_plane = np.zeros(shape=(ny, nz))
-        Average = np.zeros(shape=(nx))
+        average = np.zeros(shape=(nx))
         for x_value in range(nx):
-            x_plane[:, :] = Grid[x_value, :, :]
-            Average[x_value] = x_plane.mean()
+            x_plane[:, :] = grid[x_value, :, :]
+            average[x_value] = x_plane.mean()
     if axis == 'y':
-        Average = np.zeros(shape=(ny))
+        average = np.zeros(shape=(ny))
         y_plane = np.zeros(shape=(nx, nz))
         for y_value in range(ny):
-            y_plane[:, :] = Grid[:, y_value, :]
-            Average[y_value] = y_plane.mean()
+            y_plane[:, :] = grid[:, y_value, :]
+            average[y_value] = y_plane.mean()
     if axis == 'z':
-        Average = np.zeros(shape=(nz))
+        average = np.zeros(shape=(nz))
         z_plane = np.zeros(shape=(nx, ny))
         for z_value in range(nz):
-            z_plane[:, :] = Grid[:, :, z_value]
-            Average[z_value] = z_plane.mean()
+            z_plane[:, :] = grid[:, :, z_value]
+            average[z_value] = z_plane.mean()
 
-    return Average
-
-
-# ------------------------------------------------------------------------------
+    return average
 
 
 def get_volume(a, b, c):
@@ -255,9 +227,6 @@ def get_volume(a, b, c):
     volume = np.dot(a, np.cross(b, c))
 
     return volume
-
-
-# ------------------------------------------------------------------------------
 
 
 def numbers_2_grid(a, NGX, NGY, NGZ):
@@ -271,24 +240,18 @@ def numbers_2_grid(a, NGX, NGY, NGZ):
     return a_grid
 
 
-# ------------------------------------------------------------------------------
-
-
-def matrix_2_abc(Lattice):
+def matrix_2_abc(lattice):
     """The the VASP lattice and convert to the a,b,c,alpha,beta,gamma format"""
 
-    a = np.sqrt(Lattice[0, 0]**2 + Lattice[0, 1]**2 + Lattice[0, 2]**2)
-    b = np.sqrt(Lattice[1, 0]**2 + Lattice[1, 1]**2 + Lattice[1, 2]**2)
-    c = np.sqrt(Lattice[2, 0]**2 + Lattice[2, 1]**2 + Lattice[2, 2]**2)
+    a = np.sqrt(lattice[0, 0]**2 + lattice[0, 1]**2 + lattice[0, 2]**2)
+    b = np.sqrt(lattice[1, 0]**2 + lattice[1, 1]**2 + lattice[1, 2]**2)
+    c = np.sqrt(lattice[2, 0]**2 + lattice[2, 1]**2 + lattice[2, 2]**2)
 
-    a_vec = Lattice[0, :]
-    b_vec = Lattice[1, :]
-    c_vec = Lattice[2, :]
+    a_vec = lattice[0, :]
+    b_vec = lattice[1, :]
+    c_vec = lattice[2, :]
 
     return a, b, c, a_vec, b_vec, c_vec
-
-
-# ------------------------------------------------------------------------------
 
 
 def _print_boom(quiet=False):
@@ -357,7 +320,7 @@ def read_vasp_density(FILE, use_pandas=None, quiet=False):
         num_atoms = sum(num_type)
         coord_type = f.readline().strip()
 
-        coordinates = numpy.zeros(shape=(num_atoms, 3))
+        coordinates = np.zeros(shape=(num_atoms, 3))
         for atom_i in range(num_atoms):
             coordinates[atom_i] = [float(x) for x in f.readline().split()]
 
@@ -386,16 +349,15 @@ def read_vasp_density(FILE, use_pandas=None, quiet=False):
         else:
             print('Reading 3D data...')
             Potential = (f.readline().split() for i in range(int(math.ceil(NGX * NGY * NGZ / 5))))
-            Potential = numpy.fromiter(chain.from_iterable(Potential), float)
+            Potential = np.fromiter(chain.from_iterable(Potential), float)
 
     _print_boom(quiet=quiet)
     if not quiet:
-        print('Average of the potential = ', numpy.average(Potential))
+        print('Average of the potential = ', np.average(Potential))
 
     return Potential, NGX, NGY, NGZ, lattice
 
 
-# ------------------------------------------------------------------------------
 def read_vasp_parchg(FILE, use_pandas=None, quiet=False):
     """Generic reading of CHGCAR LOCPOT etc files from VASP
 
@@ -438,7 +400,7 @@ def read_vasp_parchg(FILE, use_pandas=None, quiet=False):
         num_atoms = sum(num_type)
         coord_type = f.readline().strip()
 
-        coordinates = numpy.zeros(shape=(num_atoms, 3))
+        coordinates = np.zeros(shape=(num_atoms, 3))
         for atom_i in range(num_atoms):
             coordinates[atom_i] = [float(x) for x in f.readline().split()]
 
@@ -466,11 +428,11 @@ def read_vasp_parchg(FILE, use_pandas=None, quiet=False):
         else:
             print('Reading 3D data...')
             density = (f.readline().split() for i in range(int(math.ceil(NGX * NGY * NGZ / 10))))
-            density = numpy.fromiter(chain.from_iterable(density), float)
+            density = np.fromiter(chain.from_iterable(density), float)
 
     _print_boom(quiet=quiet)
     if not quiet:
-        print('Average of the potential = ', numpy.average(density))
+        print('Average of the potential = ', np.average(density))
 
     return density, NGX, NGY, NGZ, lattice
 
@@ -524,7 +486,7 @@ def _read_vasp_density_fromlines(lines):
             num_atoms = sum(int(x) for x in num_type)
         elif i == 8:
             coord_type = inp
-            Coordinates = numpy.zeros(shape=(num_atoms, 3))
+            Coordinates = np.zeros(shape=(num_atoms, 3))
         elif i >= 9 and i <= num_atoms + 8:
             Coordinates[i - 9, 0] = float(inp[0])
             Coordinates[i - 9, 1] = float(inp[1])
@@ -533,12 +495,12 @@ def _read_vasp_density_fromlines(lines):
             NGX = int(inp[0])
             NGY = int(inp[1])
             NGZ = int(inp[2])
-            Potential = numpy.zeros(shape=(NGX * NGY * NGZ))
+            Potential = np.zeros(shape=(NGX * NGY * NGZ))
             # Read in the potential data
             upper_limit = int(NGX * NGY * NGZ / 5) + np.mod(NGX * NGY * NGZ, 5)
 
     _print_boom()
-    print('Average of the potential = ', numpy.average(Potential))
+    print('Average of the potential = ', np.average(Potential))
 
     lattice = lattice * scale_factor
 
@@ -605,7 +567,6 @@ def density_2_grid_gulp(Density, nx, ny, nz):
     return Potential_grid
 
 
-# ------------------------------------------------------------------------------
 def read_gulp_potential(gulpfile='gulp.out'):
     """Generic reading of GULP output
 
@@ -649,9 +610,6 @@ def read_gulp_potential(gulpfile='gulp.out'):
     return np.asarray(potential), NGX, NGY, NGZ, lattice
 
 
-# ------------------------------------------------------------------------------
-
-
 def GCD(a, b):
     """ The Euclidean Algorithm """
     a = abs(a)
@@ -661,9 +619,6 @@ def GCD(a, b):
     return b
 
 
-# ------------------------------------------------------------------------------
-
-
 def GCD_List(list):
     """ Finds the GCD of numbers in a list.
     Input: List of numbers you want to find the GCD of
@@ -671,6 +626,3 @@ def GCD_List(list):
     Returns: GCD of all numbers
     """
     return reduce(GCD, list)
-
-
-# ------------------------------------------------------------------------------
