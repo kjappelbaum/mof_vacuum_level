@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 ###############################################################################
 # Copyright Keith Butler(2014)                                                #
 #                                                                             #
@@ -17,16 +16,13 @@
 # the build - TREAT WITH CAUTION.                                             #
 ###############################################################################
 
-from __future__ import absolute_import, division
-
-import math
-
+from __future__ import division
+import numpy
 import numpy as np
+import math
 from scipy import interpolate
-from six.moves import range
 
-
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def subs_potentials(A, B, tol):
     """Difference between two sets of data of the same length
     Args:
@@ -47,7 +43,7 @@ def subs_potentials(A, B, tol):
     return C
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def bulk_vac(bulk, slab):
     """ Set electron density to zero in vacuum region
 
@@ -77,7 +73,7 @@ def bulk_vac(bulk, slab):
     return new_bulk
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 
 def match_resolution(A, B):
@@ -94,8 +90,8 @@ def match_resolution(A, B):
     resolution_b = (max(B[:, 0]) - min(B[:, 0])) / len(B)
     new_resolution = min(resolution_a, resolution_b) / 3
     # Generate the function f for each spline
-    f_a = interpolate.interp1d(A[:, 0], A[:, 1], kind='cubic')
-    f_b = interpolate.interp1d(B[:, 0], B[:, 1], kind='cubic')
+    f_a = interpolate.interp1d(A[:, 0], A[:, 1], kind="cubic")
+    f_b = interpolate.interp1d(B[:, 0], B[:, 1], kind="cubic")
     # Generate the new abscissa values, at new_resolution
     abscissa_a = np.arange(0, max(A[:, 0]), new_resolution)
     abscissa_b = np.arange(0, max(B[:, 0]), new_resolution)
@@ -110,7 +106,7 @@ def match_resolution(A, B):
     return A_new, B_new
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def spline_generate(A, new_res_factor):
     """Generate a spline of the data in a 2D array
     Args:
@@ -121,8 +117,8 @@ def spline_generate(A, new_res_factor):
     """
     resolution = (A[len(A) - 1, 0] - A[0, 0]) * new_res_factor / len(A)
     array_a = np.arange(min(A[:, 0]), max(A[:, 0]), resolution)
-    f_a = interpolate.interp1d(A[:, 0], A[:, 1], kind='cubic')
-    #ius = interpolate.InterpolatedUnivariateSpline(A[:,0],A[:,1])
+    f_a = interpolate.interp1d(A[:, 0], A[:, 1], kind="cubic")
+    # ius = interpolate.InterpolatedUnivariateSpline(A[:,0],A[:,1])
     S = f_a(array_a)
     B = np.zeros(shape=(len(A) / new_res_factor, 2))
     for i in range(len(B)):
@@ -132,7 +128,7 @@ def spline_generate(A, new_res_factor):
     return B
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 
 def matched_spline_generate(A, B, V_A, V_B):
@@ -150,13 +146,13 @@ def matched_spline_generate(A, B, V_A, V_B):
     # Determine new resolution to plot at; twice highest existing resolution
     res_a = length_A / (len(A))
     res_b = length_B / (len(B))
-    new_resolution = (min(res_a, res_b))
+    new_resolution = min(res_a, res_b)
     # Create an array containing indices of each potential point 0,1,2,....N
     array_a = np.arange(0, len(A))
     array_b = np.arange(0, len(B))
     # Generate the function f for each spline
-    f_a = interpolate.interp1d(array_a, A, kind='cubic')
-    f_b = interpolate.interp1d(array_b, B, kind='cubic')
+    f_a = interpolate.interp1d(array_a, A, kind="cubic")
+    f_b = interpolate.interp1d(array_b, B, kind="cubic")
     # Generate new arrays with the same resolution
     limits_a_new = np.arange(0, len(A))
     limits_b_new = np.arange(0, len(B))
@@ -193,7 +189,7 @@ def scissors_shift(potential, delta):
     return shifted_potential
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def extend_potential(potential, extension, vector):
     """Takes a potential and expands it.
     Args:
@@ -216,15 +212,18 @@ def extend_potential(potential, extension, vector):
         i = i + 1
         over_shoot = extension - int(extension)
         for j in range(int(len(potential) * over_shoot)):
-            extended_potential[idx, 0] = (potential[j, 0] + i * (max(potential[:, 0]) - min(potential[:, 0])) +
-                                          increment * i)
+            extended_potential[idx, 0] = (
+                potential[j, 0]
+                + i * (max(potential[:, 0]) - min(potential[:, 0]))
+                + increment * i
+            )
             extended_potential[idx, 1] = potential[j, 1]
             idx = idx + 1
 
     return extended_potential
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 
 def sort_potential(potential):
@@ -248,7 +247,7 @@ def sort_potential(potential):
     return sorted_potential
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 
 def diff_potentials(potential_a, potential_b, start, end, tol=0.04):
@@ -273,10 +272,12 @@ def diff_potentials(potential_a, potential_b, start, end, tol=0.04):
     return new_potential
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 
-def translate_grid(potential, translation, periodic=False, vector=[0, 0, 0], boundary_shift=0.0):
+def translate_grid(
+    potential, translation, periodic=False, vector=[0, 0, 0], boundary_shift=0.0
+):
     """Move the potential around
 
     This is useful for overlapping two plots, or shifting a slab to the centre
@@ -305,8 +306,9 @@ def translate_grid(potential, translation, periodic=False, vector=[0, 0, 0], bou
         new_potential_trans[i, 0] = potential[i, 0] + translation
         new_potential_trans[i, 1] = potential[i, 1]
         if periodic == True:
-            new_potential_trans[i, 0] = (new_potential_trans[i, 0] - length * int(
-                (new_potential_trans[i, 0] + boundary_shift) / length))
+            new_potential_trans[i, 0] = new_potential_trans[i, 0] - length * int(
+                (new_potential_trans[i, 0] + boundary_shift) / length
+            )
 
     if periodic == True:
         # Sort the numbers out if you have done periodic wrapping
@@ -317,7 +319,7 @@ def translate_grid(potential, translation, periodic=False, vector=[0, 0, 0], bou
     return sorted_potential_trans
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 
 def create_plotting_mesh(NGX, NGY, NGZ, pc, grad):
@@ -328,32 +330,32 @@ def create_plotting_mesh(NGX, NGY, NGZ, pc, grad):
     if pc[0] == 0 and pc[1] == 0:
         a = NGX
         b = NGY
-        p = 'zzo'
+        p = "zzo"
         c = int(pc[3] / pc[2]) - 1
     if pc[0] == 0 and pc[2] == 0:
         a = NGX
         b = NGZ
-        p = 'zoz'
+        p = "zoz"
         c = int(pc[3] / pc[1]) - 1
     if pc[1] == 0 and pc[2] == 0:
         a = NGY
         b = NGZ
-        p = 'ozz'
+        p = "ozz"
         c = int(pc[3] / pc[0]) - 1
     plane = np.zeros(shape=(a, b))
     for x in range(a):
         for y in range(b):
-            if p == 'zzo':
+            if p == "zzo":
                 plane[x, y] = grad[x, y, c]
 
     return plane
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 
 def read_cube_density(FILE):
-    f = open(FILE, 'r')
+    f = open(FILE, "r")
     lines = f.readlines()
     f.close()
     lattice = np.zeros(shape=(3, 3))
@@ -365,7 +367,7 @@ def read_cube_density(FILE):
             natms = inp[0]
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 
 def points_2_plane(a, b, c):
@@ -380,8 +382,8 @@ def points_2_plane(a, b, c):
     ca = c - a
     ba = b - a
     normal = np.cross(ba, ca)
-    #GCD_coeff = GCD_List(normal)
-    #normal = [x / GCD_coeff for x in normal]
+    # GCD_coeff = GCD_List(normal)
+    # normal = [x / GCD_coeff for x in normal]
     d = normal[0] * a[0] + normal[1] * a[1] + normal[2] * a[2]
     for i in 0, 1, 2:
         coefficients[i] = normal[i]
@@ -389,7 +391,7 @@ def points_2_plane(a, b, c):
     return coefficients
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 
 def get_third_coordinate(plane_coeff, NGX, NGY):
@@ -405,8 +407,10 @@ def get_third_coordinate(plane_coeff, NGX, NGY):
         j = 0
         while j <= NGY:
             j = j + 1
-            rounded = round(((plane_coeff[0] * j + plane_coeff[1] * i) / plane_coeff[2]))
-            standard = ((plane_coeff[0] * j + plane_coeff[1] * i) / plane_coeff[2])
+            rounded = round(
+                ((plane_coeff[0] * j + plane_coeff[1] * i) / plane_coeff[2])
+            )
+            standard = (plane_coeff[0] * j + plane_coeff[1] * i) / plane_coeff[2]
             if rounded == standard:  # Is it a whole number?
                 zz.append(-(plane_coeff[0] * i + plane_coeff[1] * j) / plane_coeff[2])
 

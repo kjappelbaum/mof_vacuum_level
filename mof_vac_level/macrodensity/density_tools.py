@@ -28,7 +28,7 @@ from numba import NumbaPendingDeprecationWarning, jit
 from scipy import interpolate
 from six.moves import range
 
-warnings.simplefilter('ignore', category=NumbaPendingDeprecationWarning)
+warnings.simplefilter("ignore", category=NumbaPendingDeprecationWarning)
 
 
 def gradient_magnitude(gx, gy, gz):
@@ -42,7 +42,9 @@ def gradient_magnitude(gx, gy, gz):
     for i in range(gx.shape[0]):
         for j in range(gy.shape[1]):
             for k in range(gz.shape[2]):
-                grad_mag[i, j, k] = np.sqrt(gx[i, j, k]**2 + gy[i, j, k]**2 + gz[i, j, k]**2)
+                grad_mag[i, j, k] = np.sqrt(
+                    gx[i, j, k] ** 2 + gy[i, j, k] ** 2 + gz[i, j, k] ** 2
+                )
 
     return grad_mag
 
@@ -134,22 +136,27 @@ def macroscopic_average(potential, periodicity, resolution):
         end = i + int(period_points / 2)
         if start < 0:
             start = start + length
-            macro_average[i] = (macro_average[i] + sum(potential[0:end]) + sum(potential[start:length]))
+            macro_average[i] = (
+                macro_average[i] + sum(potential[0:end]) + sum(potential[start:length])
+            )
             macro_average[i] = macro_average[i] / period_points
         elif end >= length:
             end = end - length
-            macro_average[i] = (macro_average[i] + sum(potential[start:length]) + sum(potential[0:end]))
+            macro_average[i] = (
+                macro_average[i] + sum(potential[start:length]) + sum(potential[0:end])
+            )
             macro_average[i] = macro_average[i] / period_points
         else:
-            macro_average[i] = (macro_average[i] + sum(potential[start:end]) / period_points)
+            macro_average[i] = (
+                macro_average[i] + sum(potential[start:end]) / period_points
+            )
 
-    print('Average of the average = ', np.mean(macro_average))
+    print("Average of the average = ", np.mean(macro_average))
 
     return macro_average
 
 
-@jit(
-    nopython=True,)
+@jit(nopython=True,)
 def cube_potential(origin, travelled, cube, Grid, nx, ny, nz):
     """Populates the sampling cube with the potential required"""
 
@@ -188,28 +195,30 @@ def cuboid_average(Grid, cube, origin, vector, nx, ny, nz, magnitude):
     i = 0
     while i < magnitude:
         travelled = np.multiply(i, vector)
-        plotting_average[i], _ = cube_potential(origin, travelled, cube, Grid, nx, ny, nz)
+        plotting_average[i], _ = cube_potential(
+            origin, travelled, cube, Grid, nx, ny, nz
+        )
         i = i + 1
 
     return plotting_average
 
 
-def planar_average(grid, nx, ny, nz, axis='z'):
+def planar_average(grid, nx, ny, nz, axis="z"):
     """Calculate the average in a given plane for the full length of the
     normal; e.g. the full length of z in the xy plane."""
-    if axis == 'x':
+    if axis == "x":
         x_plane = np.zeros(shape=(ny, nz))
         average = np.zeros(shape=(nx))
         for x_value in range(nx):
             x_plane[:, :] = grid[x_value, :, :]
             average[x_value] = x_plane.mean()
-    if axis == 'y':
+    if axis == "y":
         average = np.zeros(shape=(ny))
         y_plane = np.zeros(shape=(nx, nz))
         for y_value in range(ny):
             y_plane[:, :] = grid[:, y_value, :]
             average[y_value] = y_plane.mean()
-    if axis == 'z':
+    if axis == "z":
         average = np.zeros(shape=(nz))
         z_plane = np.zeros(shape=(nx, ny))
         for z_value in range(nz):
@@ -243,9 +252,9 @@ def numbers_2_grid(a, NGX, NGY, NGZ):
 def matrix_2_abc(lattice):
     """The the VASP lattice and convert to the a,b,c,alpha,beta,gamma format"""
 
-    a = np.sqrt(lattice[0, 0]**2 + lattice[0, 1]**2 + lattice[0, 2]**2)
-    b = np.sqrt(lattice[1, 0]**2 + lattice[1, 1]**2 + lattice[1, 2]**2)
-    c = np.sqrt(lattice[2, 0]**2 + lattice[2, 1]**2 + lattice[2, 2]**2)
+    a = np.sqrt(lattice[0, 0] ** 2 + lattice[0, 1] ** 2 + lattice[0, 2] ** 2)
+    b = np.sqrt(lattice[1, 0] ** 2 + lattice[1, 1] ** 2 + lattice[1, 2] ** 2)
+    c = np.sqrt(lattice[2, 0] ** 2 + lattice[2, 1] ** 2 + lattice[2, 2] ** 2)
 
     a_vec = lattice[0, :]
     b_vec = lattice[1, :]
@@ -256,26 +265,26 @@ def matrix_2_abc(lattice):
 
 def _print_boom(quiet=False):
     if not quiet:
-        print('\n')
-        print('BBBB       OOOO        OOOO        MMMMM   ')
-        print('BBBB       OOOO        OOOO        MMMMM   ')
-        print('BBBB       OOOO        OOOO        MMMMM   ')
-        print('B  B       OOOO        OOOO        MMMMM   ')
-        print('B  B       O  O        O  O        MMMMM   ')
-        print('B  B       O  O        O  O        MMMMM   ')
-        print('B  B       O  O        O  O        MMMMM   ')
-        print('B  B       O  O        O  O        MMMMM   ')
-        print('BBBB       O  O        O  O        M M M   ')
-        print('BBBB       O  O        O  O        M M M   ')
-        print('BBBB       O  O        O  O        M M M   ')
-        print('B  B       O  O        O  O        M M M   ')
-        print('B  B       O  O        O  O        M M M   ')
-        print('B  B       O  O        O  O        M M M   ')
-        print('B  B       O  O        O  O        M M M   ')
-        print('B  B       OOOO        OOOO        M M M   ')
-        print('BBBB       OOOO        OOOO        M M M   ')
-        print('BBBB       OOOO        OOOO        M M M   ')
-        print('BBBB       OOOO        OOOO        M M M   ')
+        print("\n")
+        print("BBBB       OOOO        OOOO        MMMMM   ")
+        print("BBBB       OOOO        OOOO        MMMMM   ")
+        print("BBBB       OOOO        OOOO        MMMMM   ")
+        print("B  B       OOOO        OOOO        MMMMM   ")
+        print("B  B       O  O        O  O        MMMMM   ")
+        print("B  B       O  O        O  O        MMMMM   ")
+        print("B  B       O  O        O  O        MMMMM   ")
+        print("B  B       O  O        O  O        MMMMM   ")
+        print("BBBB       O  O        O  O        M M M   ")
+        print("BBBB       O  O        O  O        M M M   ")
+        print("BBBB       O  O        O  O        M M M   ")
+        print("B  B       O  O        O  O        M M M   ")
+        print("B  B       O  O        O  O        M M M   ")
+        print("B  B       O  O        O  O        M M M   ")
+        print("B  B       O  O        O  O        M M M   ")
+        print("B  B       OOOO        OOOO        M M M   ")
+        print("BBBB       OOOO        OOOO        M M M   ")
+        print("BBBB       OOOO        OOOO        M M M   ")
+        print("BBBB       OOOO        OOOO        M M M   ")
 
 
 def read_vasp_density(FILE, use_pandas=None, quiet=False):
@@ -305,8 +314,8 @@ def read_vasp_density(FILE, use_pandas=None, quiet=False):
         except ImportError:
             use_pandas = False
 
-    print('Reading header information...')
-    with open(FILE, 'r') as f:
+    print("Reading header information...")
+    with open(FILE, "r") as f:
         _ = f.readline()
         scale_factor = float(f.readline())
 
@@ -330,7 +339,7 @@ def read_vasp_density(FILE, use_pandas=None, quiet=False):
         NGX, NGY, NGZ = [int(x) for x in f.readline().split()]
 
         if use_pandas:
-            print('Reading 3D data using Pandas...')
+            print("Reading 3D data using Pandas...")
             skiprows = 10 + num_atoms
             readrows = int(math.ceil(NGX * NGY * NGZ / 5))
 
@@ -344,16 +353,18 @@ def read_vasp_density(FILE, use_pandas=None, quiet=False):
             Potential = dat.iloc[:readrows, :5].values.flatten()
             remainder = (NGX * NGY * NGZ) % 5
             if remainder > 0:
-                Potential = Potential[:(-5 + remainder)]
+                Potential = Potential[: (-5 + remainder)]
 
         else:
-            print('Reading 3D data...')
-            Potential = (f.readline().split() for i in range(int(math.ceil(NGX * NGY * NGZ / 5))))
+            print("Reading 3D data...")
+            Potential = (
+                f.readline().split() for i in range(int(math.ceil(NGX * NGY * NGZ / 5)))
+            )
             Potential = np.fromiter(chain.from_iterable(Potential), float)
 
     _print_boom(quiet=quiet)
     if not quiet:
-        print('Average of the potential = ', np.average(Potential))
+        print("Average of the potential = ", np.average(Potential))
 
     return Potential, NGX, NGY, NGZ, lattice
 
@@ -385,8 +396,8 @@ def read_vasp_parchg(FILE, use_pandas=None, quiet=False):
         except ImportError:
             use_pandas = False
 
-    print('Reading header information...')
-    with open(FILE, 'r') as f:
+    print("Reading header information...")
+    with open(FILE, "r") as f:
         _ = f.readline()
         scale_factor = float(f.readline())
 
@@ -410,7 +421,7 @@ def read_vasp_parchg(FILE, use_pandas=None, quiet=False):
         NGX, NGY, NGZ = [int(x) for x in f.readline().split()]
 
         if use_pandas:
-            print('Reading 3D data using Pandas...')
+            print("Reading 3D data using Pandas...")
             skiprows = 10 + num_atoms
             readrows = int(math.ceil(NGX * NGY * NGZ / 10))
 
@@ -424,15 +435,18 @@ def read_vasp_parchg(FILE, use_pandas=None, quiet=False):
             density = dat.iloc[:readrows, :10].values.flatten()
             remainder = (NGX * NGY * NGZ) % 10
             if remainder > 0:
-                density = density[:(-10 + remainder)]
+                density = density[: (-10 + remainder)]
         else:
-            print('Reading 3D data...')
-            density = (f.readline().split() for i in range(int(math.ceil(NGX * NGY * NGZ / 10))))
+            print("Reading 3D data...")
+            density = (
+                f.readline().split()
+                for i in range(int(math.ceil(NGX * NGY * NGZ / 10)))
+            )
             density = np.fromiter(chain.from_iterable(density), float)
 
     _print_boom(quiet=quiet)
     if not quiet:
-        print('Average of the potential = ', np.average(density))
+        print("Average of the potential = ", np.average(density))
 
     return density, NGX, NGY, NGZ, lattice
 
@@ -445,7 +459,7 @@ def read_vasp_density_classic(FILE):
     also prints the progress reading through the file; this definitely makes it
     slower but might _feel_ faster!
     """
-    with open(FILE, 'r') as f:
+    with open(FILE, "r") as f:
         lines = f.readlines()
     return _read_vasp_density_fromlines(lines)
 
@@ -473,7 +487,7 @@ def _read_vasp_density_fromlines(lines):
                 Potential[k + m] = val
             k = k + 5
             if math.fmod(k, 100000) == 0:
-                print('Reading potential at point', k)
+                print("Reading potential at point", k)
         elif i == 2:
             scale_factor = float(inp[0])
         elif i >= 3 and i < 6:
@@ -500,7 +514,7 @@ def _read_vasp_density_fromlines(lines):
             upper_limit = int(NGX * NGY * NGZ / 5) + np.mod(NGX * NGY * NGZ, 5)
 
     _print_boom()
-    print('Average of the potential = ', np.average(Potential))
+    print("Average of the potential = ", np.average(Potential))
 
     lattice = lattice * scale_factor
 
@@ -539,7 +553,7 @@ def density_2_grid(Density, nx, ny, nz, Charge=False, Volume=1):
                 total_electrons = total_electrons + Density[l]
                 l = l + 1
     if Charge == True:
-        print('Total electrons: ', total_electrons / (nx * ny * nz))
+        print("Total electrons: ", total_electrons / (nx * ny * nz))
     total_electrons = total_electrons / (nx * ny * nz)
     return Potential_grid, total_electrons
 
@@ -567,7 +581,7 @@ def density_2_grid_gulp(Density, nx, ny, nz):
     return Potential_grid
 
 
-def read_gulp_potential(gulpfile='gulp.out'):
+def read_gulp_potential(gulpfile="gulp.out"):
     """Generic reading of GULP output
 
     Args:
@@ -585,25 +599,25 @@ def read_gulp_potential(gulpfile='gulp.out'):
     try:
         file_handle = open(gulpfile)
     except IOError:
-        print('File not found or path is incorrect')
+        print("File not found or path is incorrect")
 
     lines = file_handle.readlines()
     for n, line in enumerate(lines):
-        if line.rfind('Cartesian lattice vectors') > -1:
+        if line.rfind("Cartesian lattice vectors") > -1:
             lattice = np.zeros(shape=(3, 3))
             for r in range(3):
                 lattice[r] = lines[n + 2 + r].split()
             break
 
     for n, line in enumerate(lines):
-        if line.rfind('Electrostatic potential on a grid') > -1:
+        if line.rfind("Electrostatic potential on a grid") > -1:
             NGX = int(lines[n + 3].split()[3])
             NGY = int(lines[n + 3].split()[5])
             NGZ = int(lines[n + 3].split()[7])
             break
 
     for n, line in enumerate(lines):
-        if line.rfind('Electrostatic potential on a grid') > -1:
+        if line.rfind("Electrostatic potential on a grid") > -1:
             for k in reversed(list(range(9, NGX * NGY * NGZ + 9))):
                 potential.append(float(lines[n + k].split()[3]))
 
