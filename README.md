@@ -2,6 +2,8 @@
 
 This is an installable version of the code proposed by Fumanal et al. [1], building on top of work from Walsh and co-workers [2], as implemented in the [MacroDensity Python package](https://github.com/WMD-group/MacroDensity).
 
+⚠️ **Not well tested**   ⚠️
+
 
 ## Changes
 
