@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 ###############################################################################
 # Copyright Keith Butler(2014)                                                #
 #                                                                             #
@@ -17,10 +18,12 @@
 ###############################################################################
 
 from __future__ import division
+from __future__ import absolute_import
 import numpy
 import numpy as np
 import math
 from scipy import interpolate
+from six.moves import range
 
 # ------------------------------------------------------------------------------
 def subs_potentials(A, B, tol):
@@ -90,8 +93,8 @@ def match_resolution(A, B):
     resolution_b = (max(B[:, 0]) - min(B[:, 0])) / len(B)
     new_resolution = min(resolution_a, resolution_b) / 3
     # Generate the function f for each spline
-    f_a = interpolate.interp1d(A[:, 0], A[:, 1], kind="cubic")
-    f_b = interpolate.interp1d(B[:, 0], B[:, 1], kind="cubic")
+    f_a = interpolate.interp1d(A[:, 0], A[:, 1], kind='cubic')
+    f_b = interpolate.interp1d(B[:, 0], B[:, 1], kind='cubic')
     # Generate the new abscissa values, at new_resolution
     abscissa_a = np.arange(0, max(A[:, 0]), new_resolution)
     abscissa_b = np.arange(0, max(B[:, 0]), new_resolution)
@@ -117,7 +120,7 @@ def spline_generate(A, new_res_factor):
     """
     resolution = (A[len(A) - 1, 0] - A[0, 0]) * new_res_factor / len(A)
     array_a = np.arange(min(A[:, 0]), max(A[:, 0]), resolution)
-    f_a = interpolate.interp1d(A[:, 0], A[:, 1], kind="cubic")
+    f_a = interpolate.interp1d(A[:, 0], A[:, 1], kind='cubic')
     # ius = interpolate.InterpolatedUnivariateSpline(A[:,0],A[:,1])
     S = f_a(array_a)
     B = np.zeros(shape=(len(A) / new_res_factor, 2))
@@ -151,8 +154,8 @@ def matched_spline_generate(A, B, V_A, V_B):
     array_a = np.arange(0, len(A))
     array_b = np.arange(0, len(B))
     # Generate the function f for each spline
-    f_a = interpolate.interp1d(array_a, A, kind="cubic")
-    f_b = interpolate.interp1d(array_b, B, kind="cubic")
+    f_a = interpolate.interp1d(array_a, A, kind='cubic')
+    f_b = interpolate.interp1d(array_b, B, kind='cubic')
     # Generate new arrays with the same resolution
     limits_a_new = np.arange(0, len(A))
     limits_b_new = np.arange(0, len(B))
@@ -330,22 +333,22 @@ def create_plotting_mesh(NGX, NGY, NGZ, pc, grad):
     if pc[0] == 0 and pc[1] == 0:
         a = NGX
         b = NGY
-        p = "zzo"
+        p = 'zzo'
         c = int(pc[3] / pc[2]) - 1
     if pc[0] == 0 and pc[2] == 0:
         a = NGX
         b = NGZ
-        p = "zoz"
+        p = 'zoz'
         c = int(pc[3] / pc[1]) - 1
     if pc[1] == 0 and pc[2] == 0:
         a = NGY
         b = NGZ
-        p = "ozz"
+        p = 'ozz'
         c = int(pc[3] / pc[0]) - 1
     plane = np.zeros(shape=(a, b))
     for x in range(a):
         for y in range(b):
-            if p == "zzo":
+            if p == 'zzo':
                 plane[x, y] = grad[x, y, c]
 
     return plane
@@ -355,7 +358,7 @@ def create_plotting_mesh(NGX, NGY, NGZ, pc, grad):
 
 
 def read_cube_density(FILE):
-    f = open(FILE, "r")
+    f = open(FILE, 'r')
     lines = f.readlines()
     f.close()
     lattice = np.zeros(shape=(3, 3))

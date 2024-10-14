@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 ###############################################################################
 # Copyright Keith Butler(2014)                                                #
 #                                                                             #
@@ -14,6 +15,7 @@
 #                                                                             #
 ###############################################################################
 
+from __future__ import absolute_import
 import numpy
 import numpy as np
 import math
