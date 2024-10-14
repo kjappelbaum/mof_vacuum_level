@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 from __future__ import print_function
+from __future__ import absolute_import
 import numpy as np
 from itertools import chain
 import math
@@ -8,6 +10,7 @@ from numpy import pi, sin, cos, arccos, sqrt, dot
 from numpy.linalg import norm
 
 from .cart2frac import get_fractional_to_cartesian_matrix
+from six.moves import range
 
 
 def cell_to_cellpar(cell, radians=False):
@@ -33,7 +36,7 @@ def cell_to_cellpar(cell, radians=False):
 
 
 def read_cell(FILE, quiet=False):
-    with open(FILE, "r") as f:
+    with open(FILE, 'r') as f:
         cell = np.zeros(shape=(3, 3))
         tmp = f.readline().split()
         cell[0:1] = float(tmp[0]), float(tmp[1]), float(tmp[2])
@@ -45,9 +48,9 @@ def read_cell(FILE, quiet=False):
 
 
 def read_geo(FILE, quiet=False):
-    with open(FILE, "r") as f:
+    with open(FILE, 'r') as f:
         num_atoms = int(f.readline().split()[0])
-        atom_type = [""]
+        atom_type = ['']
         coord = np.zeros(shape=(num_atoms, 3))
         _ = f.readline()
         for i in range(num_atoms):
@@ -104,7 +107,7 @@ def test_point(cube_origin, coord, params, num_atoms, thr):
 def read_cube_density(FILE, quiet=False):
 
     ##    print("Reading cube file...")
-    with open(FILE, "r") as f:
+    with open(FILE, 'r') as f:
         _ = f.readline()
         _ = f.readline()
         num_atoms = int(f.readline().split()[0])
