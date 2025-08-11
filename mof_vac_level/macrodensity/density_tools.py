@@ -28,7 +28,7 @@ from numba import NumbaPendingDeprecationWarning, jit
 from scipy import interpolate
 from six.moves import range
 
-warnings.simplefilter("ignore", category=NumbaPendingDeprecationWarning)
+warnings.simplefilter('ignore', category=NumbaPendingDeprecationWarning)
 
 
 def gradient_magnitude(gx, gy, gz):
@@ -151,7 +151,7 @@ def macroscopic_average(potential, periodicity, resolution):
                 macro_average[i] + sum(potential[start:end]) / period_points
             )
 
-    print("Average of the average = ", np.mean(macro_average))
+    print('Average of the average = ', np.mean(macro_average))
 
     return macro_average
 
@@ -203,22 +203,22 @@ def cuboid_average(Grid, cube, origin, vector, nx, ny, nz, magnitude):
     return plotting_average
 
 
-def planar_average(grid, nx, ny, nz, axis="z"):
+def planar_average(grid, nx, ny, nz, axis='z'):
     """Calculate the average in a given plane for the full length of the
     normal; e.g. the full length of z in the xy plane."""
-    if axis == "x":
+    if axis == 'x':
         x_plane = np.zeros(shape=(ny, nz))
         average = np.zeros(shape=(nx))
         for x_value in range(nx):
             x_plane[:, :] = grid[x_value, :, :]
             average[x_value] = x_plane.mean()
-    if axis == "y":
+    if axis == 'y':
         average = np.zeros(shape=(ny))
         y_plane = np.zeros(shape=(nx, nz))
         for y_value in range(ny):
             y_plane[:, :] = grid[:, y_value, :]
             average[y_value] = y_plane.mean()
-    if axis == "z":
+    if axis == 'z':
         average = np.zeros(shape=(nz))
         z_plane = np.zeros(shape=(nx, ny))
         for z_value in range(nz):
@@ -265,26 +265,26 @@ def matrix_2_abc(lattice):
 
 def _print_boom(quiet=False):
     if not quiet:
-        print("\n")
-        print("BBBB       OOOO        OOOO        MMMMM   ")
-        print("BBBB       OOOO        OOOO        MMMMM   ")
-        print("BBBB       OOOO        OOOO        MMMMM   ")
-        print("B  B       OOOO        OOOO        MMMMM   ")
-        print("B  B       O  O        O  O        MMMMM   ")
-        print("B  B       O  O        O  O        MMMMM   ")
-        print("B  B       O  O        O  O        MMMMM   ")
-        print("B  B       O  O        O  O        MMMMM   ")
-        print("BBBB       O  O        O  O        M M M   ")
-        print("BBBB       O  O        O  O        M M M   ")
-        print("BBBB       O  O        O  O        M M M   ")
-        print("B  B       O  O        O  O        M M M   ")
-        print("B  B       O  O        O  O        M M M   ")
-        print("B  B       O  O        O  O        M M M   ")
-        print("B  B       O  O        O  O        M M M   ")
-        print("B  B       OOOO        OOOO        M M M   ")
-        print("BBBB       OOOO        OOOO        M M M   ")
-        print("BBBB       OOOO        OOOO        M M M   ")
-        print("BBBB       OOOO        OOOO        M M M   ")
+        print('\n')
+        print('BBBB       OOOO        OOOO        MMMMM   ')
+        print('BBBB       OOOO        OOOO        MMMMM   ')
+        print('BBBB       OOOO        OOOO        MMMMM   ')
+        print('B  B       OOOO        OOOO        MMMMM   ')
+        print('B  B       O  O        O  O        MMMMM   ')
+        print('B  B       O  O        O  O        MMMMM   ')
+        print('B  B       O  O        O  O        MMMMM   ')
+        print('B  B       O  O        O  O        MMMMM   ')
+        print('BBBB       O  O        O  O        M M M   ')
+        print('BBBB       O  O        O  O        M M M   ')
+        print('BBBB       O  O        O  O        M M M   ')
+        print('B  B       O  O        O  O        M M M   ')
+        print('B  B       O  O        O  O        M M M   ')
+        print('B  B       O  O        O  O        M M M   ')
+        print('B  B       O  O        O  O        M M M   ')
+        print('B  B       OOOO        OOOO        M M M   ')
+        print('BBBB       OOOO        OOOO        M M M   ')
+        print('BBBB       OOOO        OOOO        M M M   ')
+        print('BBBB       OOOO        OOOO        M M M   ')
 
 
 def read_vasp_density(FILE, use_pandas=None, quiet=False):
@@ -314,8 +314,8 @@ def read_vasp_density(FILE, use_pandas=None, quiet=False):
         except ImportError:
             use_pandas = False
 
-    print("Reading header information...")
-    with open(FILE, "r") as f:
+    print('Reading header information...')
+    with open(FILE, 'r') as f:
         _ = f.readline()
         scale_factor = float(f.readline())
 
@@ -339,7 +339,7 @@ def read_vasp_density(FILE, use_pandas=None, quiet=False):
         NGX, NGY, NGZ = [int(x) for x in f.readline().split()]
 
         if use_pandas:
-            print("Reading 3D data using Pandas...")
+            print('Reading 3D data using Pandas...')
             skiprows = 10 + num_atoms
             readrows = int(math.ceil(NGX * NGY * NGZ / 5))
 
@@ -356,7 +356,7 @@ def read_vasp_density(FILE, use_pandas=None, quiet=False):
                 Potential = Potential[: (-5 + remainder)]
 
         else:
-            print("Reading 3D data...")
+            print('Reading 3D data...')
             Potential = (
                 f.readline().split() for i in range(int(math.ceil(NGX * NGY * NGZ / 5)))
             )
@@ -364,7 +364,7 @@ def read_vasp_density(FILE, use_pandas=None, quiet=False):
 
     _print_boom(quiet=quiet)
     if not quiet:
-        print("Average of the potential = ", np.average(Potential))
+        print('Average of the potential = ', np.average(Potential))
 
     return Potential, NGX, NGY, NGZ, lattice
 
@@ -396,8 +396,8 @@ def read_vasp_parchg(FILE, use_pandas=None, quiet=False):
         except ImportError:
             use_pandas = False
 
-    print("Reading header information...")
-    with open(FILE, "r") as f:
+    print('Reading header information...')
+    with open(FILE, 'r') as f:
         _ = f.readline()
         scale_factor = float(f.readline())
 
@@ -421,7 +421,7 @@ def read_vasp_parchg(FILE, use_pandas=None, quiet=False):
         NGX, NGY, NGZ = [int(x) for x in f.readline().split()]
 
         if use_pandas:
-            print("Reading 3D data using Pandas...")
+            print('Reading 3D data using Pandas...')
             skiprows = 10 + num_atoms
             readrows = int(math.ceil(NGX * NGY * NGZ / 10))
 
@@ -437,7 +437,7 @@ def read_vasp_parchg(FILE, use_pandas=None, quiet=False):
             if remainder > 0:
                 density = density[: (-10 + remainder)]
         else:
-            print("Reading 3D data...")
+            print('Reading 3D data...')
             density = (
                 f.readline().split()
                 for i in range(int(math.ceil(NGX * NGY * NGZ / 10)))
@@ -446,7 +446,7 @@ def read_vasp_parchg(FILE, use_pandas=None, quiet=False):
 
     _print_boom(quiet=quiet)
     if not quiet:
-        print("Average of the potential = ", np.average(density))
+        print('Average of the potential = ', np.average(density))
 
     return density, NGX, NGY, NGZ, lattice
 
@@ -459,7 +459,7 @@ def read_vasp_density_classic(FILE):
     also prints the progress reading through the file; this definitely makes it
     slower but might _feel_ faster!
     """
-    with open(FILE, "r") as f:
+    with open(FILE, 'r') as f:
         lines = f.readlines()
     return _read_vasp_density_fromlines(lines)
 
@@ -487,7 +487,7 @@ def _read_vasp_density_fromlines(lines):
                 Potential[k + m] = val
             k = k + 5
             if math.fmod(k, 100000) == 0:
-                print("Reading potential at point", k)
+                print('Reading potential at point', k)
         elif i == 2:
             scale_factor = float(inp[0])
         elif i >= 3 and i < 6:
@@ -514,7 +514,7 @@ def _read_vasp_density_fromlines(lines):
             upper_limit = int(NGX * NGY * NGZ / 5) + np.mod(NGX * NGY * NGZ, 5)
 
     _print_boom()
-    print("Average of the potential = ", np.average(Potential))
+    print('Average of the potential = ', np.average(Potential))
 
     lattice = lattice * scale_factor
 
@@ -553,7 +553,7 @@ def density_2_grid(Density, nx, ny, nz, Charge=False, Volume=1):
                 total_electrons = total_electrons + Density[l]
                 l = l + 1
     if Charge == True:
-        print("Total electrons: ", total_electrons / (nx * ny * nz))
+        print('Total electrons: ', total_electrons / (nx * ny * nz))
     total_electrons = total_electrons / (nx * ny * nz)
     return Potential_grid, total_electrons
 
@@ -581,7 +581,7 @@ def density_2_grid_gulp(Density, nx, ny, nz):
     return Potential_grid
 
 
-def read_gulp_potential(gulpfile="gulp.out"):
+def read_gulp_potential(gulpfile='gulp.out'):
     """Generic reading of GULP output
 
     Args:
@@ -599,25 +599,25 @@ def read_gulp_potential(gulpfile="gulp.out"):
     try:
         file_handle = open(gulpfile)
     except IOError:
-        print("File not found or path is incorrect")
+        print('File not found or path is incorrect')
 
     lines = file_handle.readlines()
     for n, line in enumerate(lines):
-        if line.rfind("Cartesian lattice vectors") > -1:
+        if line.rfind('Cartesian lattice vectors') > -1:
             lattice = np.zeros(shape=(3, 3))
             for r in range(3):
                 lattice[r] = lines[n + 2 + r].split()
             break
 
     for n, line in enumerate(lines):
-        if line.rfind("Electrostatic potential on a grid") > -1:
+        if line.rfind('Electrostatic potential on a grid') > -1:
             NGX = int(lines[n + 3].split()[3])
             NGY = int(lines[n + 3].split()[5])
             NGZ = int(lines[n + 3].split()[7])
             break
 
     for n, line in enumerate(lines):
-        if line.rfind("Electrostatic potential on a grid") > -1:
+        if line.rfind('Electrostatic potential on a grid') > -1:
             for k in reversed(list(range(9, NGX * NGY * NGZ + 9))):
                 potential.append(float(lines[n + k].split()[3]))
 
